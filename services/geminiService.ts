@@ -1,10 +1,11 @@
 import { GoogleGenAI } from "@google/genai";
+import type { ChatMessage } from '../types';
 
 const API_KEY_STORAGE_KEY = 'gemini-api-key';
 const MODEL_NAME_STORAGE_KEY = 'gemini-model-name';
 const DEFAULT_MODEL_NAME = 'gemini-2.5-flash';
 
-const getApiKey = (): string | null => {
+export const getApiKey = (): string | null => {
   return localStorage.getItem(API_KEY_STORAGE_KEY);
 };
 
@@ -88,5 +89,41 @@ export const polishText = async (text: string, fieldType: 'bio' | 'systemInstruc
         return `错误：润色失败。 ${error.message}`;
     }
     return "润色时发生未知错误。";
+  }
+};
+
+export const continueConversation = async (systemInstruction: string, history: ChatMessage[], newMessage: string): Promise<string> => {
+  const ai = getAiClient();
+  if (!ai) {
+    return "错误：尚未设置 Gemini API 密钥。请在设置页面中配置。";
+  }
+
+  const fullHistory = [
+    ...history,
+    { role: 'user', parts: [{ text: newMessage }] }
+  ];
+
+  try {
+    const modelName = getModelName();
+    const response = await ai.models.generateContent({
+      model: modelName,
+      contents: fullHistory,
+      config: {
+        systemInstruction: systemInstruction,
+        temperature: 1.0,
+        topP: 0.95,
+      },
+    });
+
+    return response.text ?? "";
+  } catch (error) {
+    console.error("调用 Gemini API 继续对话时出错:", error);
+    if (error instanceof Error) {
+        if(error.message.includes('API key not valid')) {
+            return "错误：API 密钥无效。请检查您的配置。";
+        }
+        return `错误：无法生成内容。请检查网络连接或 API 密钥。 ${error.message}`;
+    }
+    return "生成内容时发生未知错误。";
   }
 };

@@ -1,5 +1,5 @@
 import React, { createContext, useState, useContext, useEffect, ReactNode, useCallback } from 'react';
-import { FeedItem } from '../types';
+import { FeedItem, ChatMessage } from '../types';
 
 const LOCAL_STORAGE_KEY = 'feedContent';
 
@@ -11,6 +11,7 @@ interface FeedContentContextType {
   toggleLike: (id: string) => void;
   toggleSave: (id: string) => void;
   searchItems: (query: string) => FeedItem[];
+  addMessageToHistory: (id: string, message: ChatMessage) => void;
 }
 
 const FeedContentContext = createContext<FeedContentContextType | undefined>(undefined);
@@ -23,7 +24,8 @@ export const FeedContentProvider: React.FC<{ children: ReactNode }> = ({ childre
         const parsed = JSON.parse(stored);
         return parsed.map((item: any) => ({
           ...item,
-          createdAt: new Date(item.createdAt || new Date())
+          createdAt: new Date(item.createdAt || new Date()),
+          history: item.history || []
         }));
       }
     } catch (error) {
@@ -74,6 +76,16 @@ export const FeedContentProvider: React.FC<{ children: ReactNode }> = ({ childre
 
   const savedItems = allItems.filter(item => item.isSaved);
 
+  const addMessageToHistory = useCallback((id: string, message: ChatMessage) => {
+    setAllItems(prev => prev.map(item => {
+      if (item.id === id) {
+        const newHistory = [...(item.history || []), message];
+        return { ...item, history: newHistory };
+      }
+      return item;
+    }));
+  }, []);
+
   const value = {
     allItems,
     savedItems,
@@ -81,7 +93,8 @@ export const FeedContentProvider: React.FC<{ children: ReactNode }> = ({ childre
     updateItem,
     toggleLike,
     toggleSave,
-    searchItems
+    searchItems,
+    addMessageToHistory
   };
 
   return (

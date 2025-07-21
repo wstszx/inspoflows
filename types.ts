@@ -6,6 +6,7 @@ export interface Persona {
   bio: string;
   systemInstruction: string;
   cardClassName: string;
+  tags: string[];
 }
 
 export interface FeedItem {
@@ -15,4 +16,5 @@ export interface FeedItem {
   isLiked: boolean;
   isSaved: boolean;
   isLoading?: boolean;
+  createdAt: Date;
 }

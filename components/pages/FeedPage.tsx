@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { Link } from 'react-router-dom';
 import { generateInspiration } from '../../services/geminiService';
 import { usePersonas } from '../../contexts/PersonaContext';
+import { useFeedContent } from '../../contexts/FeedContentContext';
 import type { FeedItem, Persona } from '../../types';
 import Card from '../ui/Card';
 import Button from '../ui/Button';
@@ -12,6 +13,7 @@ import { PlusIcon } from '../icons/PlusIcon';
 
 const FeedPage: React.FC = () => {
   const { personas } = usePersonas();
+  const { addItem, updateItem, toggleLike, toggleSave } = useFeedContent();
   const [feedItems, setFeedItems] = useState<FeedItem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -24,12 +26,26 @@ const FeedPage: React.FC = () => {
   const fetchContent = useCallback(async (persona: Persona, itemId: string) => {
     try {
       const content = await generateInspiration(persona.systemInstruction);
+      const updatedItem = {
+        id: itemId,
+        persona,
+        content,
+        isLiked: false,
+        isSaved: false,
+        isLoading: false,
+        createdAt: new Date()
+      };
+      
       setFeedItems(prevItems =>
         prevItems.map(item =>
-          item.id === itemId ? { ...item, content, isLoading: false, persona } : item
+          item.id === itemId ? updatedItem : item
         )
       );
-       if (content.startsWith("错误：")) {
+      
+      // 添加到全局内容管理
+      addItem(updatedItem);
+      
+      if (content.startsWith("错误：")) {
         setError(content);
       } else {
         setError(null);
@@ -37,13 +53,23 @@ const FeedPage: React.FC = () => {
     } catch (e) {
       const errorMessage = e instanceof Error ? e.message : '发生未知错误';
       setError(errorMessage);
+      const failedItem = {
+        id: itemId,
+        persona,
+        content: `加载失败: ${errorMessage}`,
+        isLiked: false,
+        isSaved: false,
+        isLoading: false,
+        createdAt: new Date()
+      };
+      
       setFeedItems(prevItems =>
         prevItems.map(item =>
-          item.id === itemId ? { ...item, content: `加载失败: ${errorMessage}`, isLoading: false, persona } : item
+          item.id === itemId ? failedItem : item
         )
       );
     }
-  }, []);
+  }, [addItem]);
 
   const generateNewItems = useCallback((count: number): FeedItem[] => {
     if (personas.length === 0) return [];
@@ -58,6 +84,7 @@ const FeedPage: React.FC = () => {
           isLiked: false,
           isSaved: false,
           isLoading: true,
+          createdAt: new Date(),
         };
       });
   }, [getRandomPersona, personas.length]);
@@ -96,6 +123,7 @@ const FeedPage: React.FC = () => {
         item.id === id ? { ...item, isLiked: !item.isLiked } : item
       )
     );
+    toggleLike(id);
   };
 
   const handleSave = (id: string) => {
@@ -104,6 +132,7 @@ const FeedPage: React.FC = () => {
         item.id === id ? { ...item, isSaved: !item.isSaved } : item
       )
     );
+    toggleSave(id);
   };
   
   const isApiKeyMissing = !process.env.API_KEY;

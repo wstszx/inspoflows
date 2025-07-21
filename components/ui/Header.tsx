@@ -1,6 +1,10 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { SparklesIcon } from '../icons/SparklesIcon';
+import { SearchIcon } from '../icons/SearchIcon';
+import { BookmarkIcon } from '../icons/BookmarkIcon';
+import { SettingsIcon } from '../icons/SettingsIcon';
+import ThemeToggle from './ThemeToggle';
 
 const Header: React.FC = () => {
   const linkClasses = "px-3 py-2 text-base font-medium text-onSurface/80 hover:text-onSurface transition-colors";
@@ -15,7 +19,7 @@ const Header: React.FC = () => {
             <SparklesIcon className="w-7 h-7" />
             <span>灵感流</span>
           </NavLink>
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-1">
             <NavLink
               to="/"
               className={({ isActive }) => `${linkClasses} ${isActive ? activeLinkClasses : inactiveLinkClasses}`}
@@ -23,11 +27,30 @@ const Header: React.FC = () => {
               信息流
             </NavLink>
             <NavLink
+              to="/search"
+              className={({ isActive }) => `${linkClasses} ${isActive ? activeLinkClasses : inactiveLinkClasses}`}
+            >
+              <SearchIcon className="w-5 h-5" />
+            </NavLink>
+            <NavLink
+              to="/saved"
+              className={({ isActive }) => `${linkClasses} ${isActive ? activeLinkClasses : inactiveLinkClasses}`}
+            >
+              <BookmarkIcon className="w-5 h-5" />
+            </NavLink>
+            <NavLink
               to="/personas"
               className={({ isActive }) => `${linkClasses} ${isActive ? activeLinkClasses : inactiveLinkClasses}`}
             >
                 角色
             </NavLink>
+            <NavLink
+              to="/settings"
+              className={({ isActive }) => `${linkClasses} ${isActive ? activeLinkClasses : inactiveLinkClasses}`}
+            >
+              <SettingsIcon className="w-5 h-5" />
+            </NavLink>
+            <ThemeToggle />
           </div>
         </div>
       </nav>

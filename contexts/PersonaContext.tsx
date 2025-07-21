@@ -22,7 +22,11 @@ export const PersonaProvider: React.FC<{ children: ReactNode }> = ({ children })
       if (storedPersonas) {
         // A simple migration to add IDs if they don't exist
         const parsed = JSON.parse(storedPersonas);
-        return parsed.map((p: Partial<Persona>) => ({...p, id: p.id || uuidv4()}));
+        return parsed.map((p: Partial<Persona>) => ({
+          ...p, 
+          id: p.id || uuidv4(),
+          tags: p.tags || []
+        }));
       }
     } catch (error) {
       console.error('Error reading personas from localStorage', error);

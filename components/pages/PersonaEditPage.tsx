@@ -19,9 +19,11 @@ const PersonaEditPage: React.FC = () => {
     bio: '',
     systemInstruction: '',
     cardClassName: CARD_COLORS[0],
+    tags: [],
   });
   const [isPolishingBio, setIsPolishingBio] = useState(false);
   const [isPolishingSystemInstruction, setIsPolishingSystemInstruction] = useState(false);
+  const [newTag, setNewTag] = useState('');
 
   useEffect(() => {
     if (isEditing && id) {
@@ -41,6 +43,24 @@ const PersonaEditPage: React.FC = () => {
   
   const handleColorChange = (color: string) => {
     setPersona(prev => ({ ...prev, cardClassName: color }));
+  };
+
+  const addTag = () => {
+    if (newTag.trim() && !persona.tags.includes(newTag.trim())) {
+      setPersona(prev => ({ ...prev, tags: [...prev.tags, newTag.trim()] }));
+      setNewTag('');
+    }
+  };
+
+  const removeTag = (tagToRemove: string) => {
+    setPersona(prev => ({ ...prev, tags: prev.tags.filter(tag => tag !== tagToRemove) }));
+  };
+
+  const handleTagKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      addTag();
+    }
   };
 
   const handlePolish = async (
@@ -113,6 +133,50 @@ const PersonaEditPage: React.FC = () => {
           </div>
           <textarea id="systemInstruction" name="systemInstruction" value={persona.systemInstruction} onChange={handleChange} rows={6} required className={formInputClass}></textarea>
           <p className="text-xs text-onBackground/60 mt-1">这是给AI的核心指令，告诉它应该如何扮演这个角色并生成内容。</p>
+        </div>
+
+        <div>
+            <label className="block text-sm font-medium text-onBackground/90 mb-1">标签</label>
+            <div className="space-y-3">
+                <div className="flex space-x-2">
+                    <input
+                        type="text"
+                        value={newTag}
+                        onChange={(e) => setNewTag(e.target.value)}
+                        onKeyPress={handleTagKeyPress}
+                        placeholder="添加标签..."
+                        className="flex-1 px-3 py-2 bg-surface border border-outline rounded-md shadow-sm placeholder-onSurface/50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-background focus:ring-outline"
+                    />
+                    <button
+                        type="button"
+                        onClick={addTag}
+                        disabled={!newTag.trim()}
+                        className="px-4 py-2 bg-outline text-onOutline rounded-md hover:bg-outline/80 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        添加
+                    </button>
+                </div>
+                {persona.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                        {persona.tags.map(tag => (
+                            <span
+                                key={tag}
+                                className="inline-flex items-center px-3 py-1 bg-outline/20 text-onSurface rounded-full text-sm"
+                            >
+                                {tag}
+                                <button
+                                    type="button"
+                                    onClick={() => removeTag(tag)}
+                                    className="ml-2 text-onSurface/60 hover:text-onSurface"
+                                >
+                                    ×
+                                </button>
+                            </span>
+                        ))}
+                    </div>
+                )}
+            </div>
+            <p className="text-xs text-onBackground/60 mt-1">为角色添加分类标签，便于管理和搜索。</p>
         </div>
 
         <div>

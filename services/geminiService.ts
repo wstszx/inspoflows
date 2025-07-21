@@ -1,16 +1,35 @@
 import { GoogleGenAI } from "@google/genai";
 
-// Ensure the API key is available in the environment variables.
-if (!process.env.API_KEY) {
-  console.error("未设置 API_KEY 环境变量。");
+const API_KEY_STORAGE_KEY = 'gemini-api-key';
+const MODEL_NAME_STORAGE_KEY = 'gemini-model-name';
+const DEFAULT_MODEL_NAME = 'gemini-2.5-flash';
+
+const getApiKey = (): string | null => {
+  return localStorage.getItem(API_KEY_STORAGE_KEY);
+};
+
+const getModelName = (): string => {
+  return localStorage.getItem(MODEL_NAME_STORAGE_KEY) || DEFAULT_MODEL_NAME;
 }
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY as string });
+const getAiClient = () => {
+  const apiKey = getApiKey();
+  if (!apiKey) {
+    return null;
+  }
+  return new GoogleGenAI({ apiKey });
+}
 
 export const generateInspiration = async (systemInstruction: string): Promise<string> => {
+  const ai = getAiClient();
+  if (!ai) {
+    return "错误：尚未设置 Gemini API 密钥。请在设置页面中配置。";
+  }
+
   try {
+    const modelName = getModelName();
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash-preview-04-17",
+      model: modelName,
       contents: "请根据你的角色设定，生成一段新颖的、之前没有提过的、有趣且易于理解的知识内容。请确保每次生成的主题或比喻都和以往不同。",
       config: {
         systemInstruction: systemInstruction,
@@ -19,7 +38,7 @@ export const generateInspiration = async (systemInstruction: string): Promise<st
       },
     });
 
-    return response.text;
+    return response.text ?? "";
   } catch (error) {
     console.error("调用 Gemini API 时出错:", error);
     if (error instanceof Error) {
@@ -33,14 +52,20 @@ export const generateInspiration = async (systemInstruction: string): Promise<st
 };
 
 export const polishText = async (text: string, fieldType: 'bio' | 'systemInstruction'): Promise<string> => {
+  const ai = getAiClient();
+  if (!ai) {
+    return "错误：尚未设置 Gemini API 密钥。请在设置页面中配置。";
+  }
+  
   const systemInstructions = {
     bio: `你是一位优秀的文案编辑。你的任务是将用户提供的AI角色简介润色得更生动、吸引人，但保持其核心意思不变。简介应该简短精炼，最好在一句话以内。直接返回润色后的文本，不要包含任何额外解释或标签。`,
     systemInstruction: `你是一位AI提示工程专家。你的任务是优化用户提供的系统指令，使其更清晰、具体、有效，更能引导AI稳定地扮演角色并生成高质量内容。保持核心任务不变。直接返回优化后的指令文本，不要包含任何额外解释或标签。`
   };
 
   try {
+    const modelName = getModelName();
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash-preview-04-17",
+      model: modelName,
       contents: text,
       config: {
         systemInstruction: systemInstructions[fieldType],
@@ -48,7 +73,7 @@ export const polishText = async (text: string, fieldType: 'bio' | 'systemInstruc
       },
     });
 
-    let polishedText = response.text.trim();
+    let polishedText = response.text?.trim() ?? "";
     if (polishedText.startsWith('"') && polishedText.endsWith('"')) {
         polishedText = polishedText.substring(1, polishedText.length - 1);
     }

@@ -11,26 +11,27 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
+        darkMode: 'class',
         theme: {
           extend: {
             colors: {
-              background: '#FDF7FA',
-              surface: '#FFECF3',
-              onSurface: '#211F20',
-              onBackground: '#211F20',
-              outline: '#79747E',
+              background: 'var(--color-background)',
+              surface: 'var(--color-surface)',
+              onSurface: 'var(--color-on-surface)',
+              onBackground: 'var(--color-on-background)',
+              outline: 'var(--color-outline)',
               
-              'card-pink': '#FACEE5',
-              'card-blue': '#AEC6FF',
-              'card-orange': '#FEC89A',
-              'card-lime': '#D4ED9A',
-              'card-purple': '#E8DFF5',
-              'on-card': '#211F20',
+              'card-pink': 'var(--color-card-pink)',
+              'card-blue': 'var(--color-card-blue)',
+              'card-orange': 'var(--color-card-orange)',
+              'card-lime': 'var(--color-card-lime)',
+              'card-purple': 'var(--color-card-purple)',
+              'on-card': 'var(--color-on-card)',
 
-              error: '#B3261E',
-              onError: '#FFFFFF',
-              errorContainer: '#F9DEDC',
-              onErrorContainer: '#410E0B',
+              error: 'var(--color-error)',
+              onError: 'var(--color-on-error)',
+              errorContainer: 'var(--color-error-container)',
+              onErrorContainer: 'var(--color-on-error-container)',
             }
           }
         }
@@ -39,6 +40,41 @@
     <style>
       body {
         font-family: 'Roboto', sans-serif;
+      }
+      :root {
+        --color-background: #FDF7FA;
+        --color-surface: #FFECF3;
+        --color-on-surface: #211F20;
+        --color-on-background: #211F20;
+        --color-outline: #79747E;
+        --color-card-pink: #FACEE5;
+        --color-card-blue: #AEC6FF;
+        --color-card-orange: #FEC89A;
+        --color-card-lime: #D4ED9A;
+        --color-card-purple: #E8DFF5;
+        --color-on-card: #211F20;
+        --color-error: #B3261E;
+        --color-on-error: #FFFFFF;
+        --color-error-container: #F9DEDC;
+        --color-on-error-container: #410E0B;
+      }
+
+      .dark {
+        --color-background: #1A1115;
+        --color-surface: #2C2126;
+        --color-on-surface: #EAE0E4;
+        --color-on-background: #EAE0E4;
+        --color-outline: #938F99;
+        --color-card-pink: #7D5260;
+        --color-card-blue: #384971;
+        --color-card-orange: #7F573A;
+        --color-card-lime: #5A6B3A;
+        --color-card-purple: #695F7A;
+        --color-on-card: #EAE0E4;
+        --color-error: #F2B8B5;
+        --color-on-error: #601410;
+        --color-error-container: #8C1D18;
+        --color-on-error-container: #F9DEDC;
       }
     </style>
   <script type="importmap">
